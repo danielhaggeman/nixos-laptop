@@ -12,7 +12,7 @@
 
   boot.kernelParams = [
     "snd_hda_intel.dmic_detect=0"
-    "snd_hda_intel.model=auto"
+    "snd_hda_intel.model=dell-headset-multi"
   ];
 
   # Bootloader
@@ -38,7 +38,7 @@
   users.users.daniel = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "networkmanager" "video" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
   };
   security.sudo.wheelNeedsPassword = false;
 
@@ -71,18 +71,29 @@
   hardware.opengl.enable = true;  # provides mesa & drivers  
 
   # Sound
-  hardware.pulseaudio = {
-    enable = true;
-    support32Bit = true;
-  };
-  services.pipewire.enable = false;
+#  hardware.pulseaudio = {
+ #   enable = true;
+  #  support32Bit = true;
+ # };
+ # services.pipewire.enable = false;
+  
+   
+
+hardware.pulseaudio.enable = false;
+
+services.pipewire = {
+  enable = true;
+  alsa.enable = true;
+  alsa.support32Bit = true;
+  pulse.enable = true;   # provides PulseAudio compatibility
+};
+
 
   # Kernel tuning
   boot.kernel.sysctl = {
     "vm.max_map_count" = 16777216;
     "fs.file-max" = 524288;
   };
-
   # Programs
   programs.zsh = {
     enable = true;
@@ -179,6 +190,8 @@
     qt6.qtsvg
     qt6.qtvirtualkeyboard
     qt6.qtmultimedia
+    wireplumber
+    alsa-utils
   ];
 
   # OpenRazer
