@@ -7,6 +7,7 @@ export NNN_FCOLORS="D4DEB778E79F9F67D2E5E5D2"
 alias e="sudo yazi"
 alias n="sudo nano /etc/nixos/configuration.nix"
 alias f="sudo nano /etc/nixos/flake.nix"
+alias b="~/dotfiles/hypr/scripts/backup.sh"
 alias r="sudo nixos-rebuild switch --flake /etc/nixos"
 # Enable colors
 autoload -U colors && colors
