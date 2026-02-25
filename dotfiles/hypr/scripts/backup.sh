@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 set -euo pipefail
 
 echo "==> Backup + Push (everything UNDER dotfiles/)"
@@ -14,7 +14,8 @@ SRC_NIXOS="/etc/nixos"
 REPO_ROOT="$HOME/github/nixos-laptop"
 DOTFILES_DIR="$REPO_ROOT/dotfiles"
 
-REPO_URL="https://github.com/danielhaggeman/nixos-laptop.git"
+# SSH remote for automatic push
+REPO_URL="git@github.com:danielhaggeman/nixos-laptop.git"
 
 # -------------------------
 # PREPARE REPO
@@ -22,15 +23,16 @@ REPO_URL="https://github.com/danielhaggeman/nixos-laptop.git"
 
 echo "-> Preparing repo"
 mkdir -p "$DOTFILES_DIR"
-rm -rf "$REPO_ROOT"/*
+rm -rf "$REPO_ROOT"/* || true
 
 # -------------------------
-# COPY ~/dotfiles (flatten symlinks)
+# COPY ~/dotfiles (flatten symlinks, skip known recursive symlinks)
 # -------------------------
 
 echo "-> Copying ~/dotfiles (flatten symlinks)"
 rsync -aL \
   --exclude ".git" \
+  --exclude "nnn/nnn" \
   "$SRC_HOME_DOTFILES/" "$DOTFILES_DIR/"
 
 # -------------------------
@@ -41,10 +43,10 @@ echo "-> Copying .zshrc"
 cp -f "$SRC_ZSHRC" "$DOTFILES_DIR/.zshrc"
 
 # -------------------------
-# COPY /etc/nixos (flatten symlinks, skip hardware-configuration)
+# COPY /etc/nixos (flatten symlinks, skip hardware-configuration & scripts)
 # -------------------------
 
-echo "-> Copying /etc/nixos (flatten symlinks, skip broken/hardware-configuration)"
+echo "-> Copying /etc/nixos (flatten symlinks)"
 mkdir -p "$DOTFILES_DIR/nixos"
 
 rsync -aL \
@@ -75,10 +77,9 @@ EOF
 cd "$REPO_ROOT"
 
 if [ ! -d ".git" ]; then
+  echo "-> Initializing new git repository"
   git init
   git remote add origin "$REPO_URL"
-else
-  git remote set-url origin "$REPO_URL"
 fi
 
 # -------------------------
@@ -94,7 +95,10 @@ else
   git commit --no-edit -m "backup $TIMESTAMP"
 fi
 
+# Set branch to main
 git branch -M main
+
+# Push via SSH (first-time push handled automatically)
 git push -u origin main --force
 
 echo "==> DONE"
