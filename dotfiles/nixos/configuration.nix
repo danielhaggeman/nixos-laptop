@@ -11,8 +11,8 @@
   imports = [ ./hardware-configuration.nix ];
 
   boot.kernelParams = [
-    "snd_hda_intel.dmic_detect=0"
-    "snd_hda_intel.model=dell-headset-multi"
+    "snd_hda_intel.dmic_detect=auto"
+   # "snd_hda_intel.model=dell-headset-multi"
   ];
 
   # Bootloader
