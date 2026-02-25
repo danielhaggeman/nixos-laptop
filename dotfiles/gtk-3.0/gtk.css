@@ -1,0 +1,17 @@
+/* Thunar background transparency */
+ThunarWindow {
+    background-color: rgba(40, 42, 54, 0.8); /* Dracula background, 80% opacity */
+}
+
+/* Treeview / file list */
+ThunarView,
+ThunarColumnView {
+    background-color: rgba(40, 42, 54, 0.8);
+    color: #f8f8f2; /* Dracula text color */
+}
+
+/* Selected items */
+view:selected {
+    background-color: #6272a4; /* Dracula selection */
+    color: #f8f8f2;
+}

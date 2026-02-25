@@ -1,0 +1,94 @@
+{
+  description = "My full NixOS system with Home-Manager, Zen Browser, Star Citizen support, and SilentSDDM";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-citizen.url = "github:LovingMelody/nix-citizen";
+
+    # Optional gaming support
+    nix-gaming.url = "github:fufexan/nix-gaming";
+    nix-citizen.inputs.nix-gaming.follows = "nix-gaming";
+
+    # SilentSDDM input
+    silentSDDM = {
+      url = "github:uiriansan/SilentSDDM";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, nix-citizen, silentSDDM, ... }:
+  let
+    system = "x86_64-linux";
+  in {
+    nixosConfigurations.nix = nixpkgs.lib.nixosSystem {
+      inherit system;
+
+      specialArgs = { inherit inputs system; };
+
+      modules = [
+        ./configuration.nix
+        ./hardware-configuration.nix
+
+        # Home Manager
+        home-manager.nixosModules.home-manager
+
+        {
+          nixpkgs.config.allowUnfree = true;
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+
+          home-manager.users.daniel = { pkgs, ... }: {
+            home.stateVersion = "24.11";
+
+            imports = [
+              zen-browser.homeModules.beta
+            ];
+
+            programs.zen-browser.enable = true;
+
+            home.packages = with pkgs; [
+              inputs.nix-citizen.packages.${system}.rsi-launcher
+              fastfetch
+              vscode
+              discord
+              rofi
+              protonup-qt
+              lutris
+              bottles
+              heroic
+              spicetify-cli
+              pavucontrol
+              polychromatic
+              fanctl
+              lm_sensors
+            ];
+          };
+        }
+
+        # nix-citizen module
+        nix-citizen.nixosModules.default
+
+        # SilentSDDM module
+        silentSDDM.nixosModules.default
+
+        # SilentSDDM options
+        {
+          programs.silentSDDM.enable = true;
+          programs.silentSDDM.theme = "default"; # choose from rei, ken, silvia, everforest, default
+          # Optional: add settings/backgrounds/profileIcons here
+        }
+      ];
+    };
+  };
+}
