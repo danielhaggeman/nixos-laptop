@@ -192,6 +192,7 @@ services.pipewire = {
     qt6.qtmultimedia
     wireplumber
     alsa-utils
+    hypridle
   ];
 
   # OpenRazer
