@@ -206,6 +206,8 @@ services.pipewire = {
     wireplumber
     alsa-utils
     hypridle
+    btop
+    networkmanagerapplet
   ];
 
   # OpenRazer
