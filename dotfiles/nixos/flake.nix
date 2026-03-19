@@ -53,7 +53,7 @@
               polychromatic
               openrazer-daemon
               fanctl
- 	      lm_sensors
+ 	            lm_sensors
               spicetify-cli
             ];
           };

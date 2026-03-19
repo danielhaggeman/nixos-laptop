@@ -17,7 +17,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking
-  networking.hostName = "nixosbtw"; # Define your hostname.
+  networking.hostName = "nix"; # Define your hostname.
   networking.networkmanager.enable = true;
   # networking.interfaces.eno1.ethtoolCommands = ''
   #   ethtool -s eno1 speed 1000 duplex full autoneg on
@@ -157,6 +157,7 @@
     papirus-icon-theme
     adwaita-icon-theme
     lxappearance
+    qdirstat
   ];
 
   # Flatpak
@@ -187,20 +188,11 @@
     ];
   };
 
-  # Custom systemd service
-  systemd.services.deepcool-digital-linux = {
-    description = "Deepcool Digital Linux Service";
-
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-
-    serviceConfig = {
-      ExecStart = "/opt/deepcool/deepcool-digital-linux";
-      Restart = "on-failure";
-      RestartSec = 2;
-      User = "root";
-    };
-  };
+environment.variables = {
+  GTK_THEME = "Arc-Dark";
+  GTK_ICON_THEME = "Papirus-Dark";
+};
+ 
 
   # Nix settings
   nix.settings = {
