@@ -1,149 +1,115 @@
-{ config, pkgs, lib, ... }:
+# Edit this configuration file to define what should be installed on
+# your system. Help is available in the configuration.nix(5) man page, on
+# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
+
+{ config, lib, pkgs, ... }:
 
 {
-  # Nixpkgs
   nixpkgs.config.allowUnfree = true;
 
-  # System state version
-  system.stateVersion = "25.11";
-
-  # Hardware configuration
-  imports = [ ./hardware-configuration.nix ];
-
-  boot.kernelParams = [
-    "snd_hda_intel.dmic_detect=auto"
-   # "snd_hda_intel.model=dell-headset-multi"
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
   ];
 
   # Bootloader
-  boot.loader.systemd-boot.enable = false;
+  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    device = "nodev";
-    theme = "/etc/nixos/grub-themes/HyperFluent";
-    useOSProber = true;
-  };
 
   # Networking
-  networking.hostName = "nix";
+  networking.hostName = "nixosbtw"; # Define your hostname.
   networking.networkmanager.enable = true;
+  # networking.interfaces.eno1.ethtoolCommands = ''
+  #   ethtool -s eno1 speed 1000 duplex full autoneg on
+  # '';
 
   # Timezone
   time.timeZone = "Europe/Amsterdam";
-  
-  # Tunarr
- 
-  
-programs.thunar.enable = true;
-programs.xfconf.enable = true;
 
-programs.thunar.plugins = with pkgs.xfce; [
-  thunar-archive-plugin
-  thunar-volman
-];
-
-services.gvfs.enable = true;
-services.tumbler.enable = true;
-  # Users & shells
-  users.defaultUserShell = pkgs.zsh;
-  users.users.daniel = {
-    isNormalUser = true;
-    shell = pkgs.zsh;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
-  };
-  security.sudo.wheelNeedsPassword = false;
-
-  # Services
+  # Disk / device services
   services.udisks2.enable = true;
+
+  # Udev rules
   services.udev.extraRules = ''
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3633", MODE="0666"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="34d3", ATTRS{idProduct}=="1100", MODE="0666"
   '';
-  services.tailscale.enable = true;
-  services.flatpak.enable = true;
-  security.polkit.enable = true;
 
-  # Display & GUI
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;       # needed for X11 apps inside Wayland
-  };
-
-  services.displayManager.defaultSession = "hyprland";
-
-  # Nvidia configuration
-  hardware.nvidia = {
-    open = true;                  # open-source Nvidia driver
-    modesetting.enable = true;    # required for Wayland
-    nvidiaSettings = true;        # GUI tool
-  };
-
-  # OpenGL support
-  hardware.opengl.enable = true;  # provides mesa & drivers  
-
-  # Sound
-#  hardware.pulseaudio = {
- #   enable = true;
-  #  support32Bit = true;
- # };
- # services.pipewire.enable = false;
-  
-   
-
-hardware.pulseaudio.enable = false;
-
-services.pipewire = {
-  enable = true;
-  alsa.enable = true;
-  alsa.support32Bit = true;
-  pulse.enable = true;   # provides PulseAudio compatibility
-};
-
-
-  # Kernel tuning
-  boot.kernel.sysctl = {
-    "vm.max_map_count" = 16777216;
-    "fs.file-max" = 524288;
-  };
-  # Programs
+  # Shell (ZSH)
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    syntaxHighlighting.enable = false;
-    autosuggestions.enable = false;
+    syntaxHighlighting.enable = false; # handled manually in .zshrc
+    autosuggestions.enable = false;    # handled manually in .zshrc
   };
+  users.defaultUserShell = pkgs.zsh;
+
+  # GPU (AMD)
+  services.xserver.videoDrivers = [ "amdgpu" ];
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+
+    extraPackages = with pkgs; [
+      mesa
+      vulkan-loader
+    ];
+
+    extraPackages32 = with pkgs; [
+      driversi686Linux.mesa
+    ];
+  };
+
+  # Gaming
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
   };
-  programs.gamemode.enable = true;
-  programs.firefox.enable = true;
 
-  # Fonts
-  fonts = {
-    fontconfig.enable = true;
-    packages = with pkgs; [
-      nerd-fonts.commit-mono
-      nerd-fonts.fira-code
-      nerd-fonts.symbols-only
-      fira-sans
-      roboto
-      font-awesome
-    ];
+  programs.gamemode.enable = true;
+
+  # Audio
+  services.pulseaudio.enable = true;
+  services.pipewire.enable = false;
+  services.pipewire.pulse.enable = false;
+  services.pipewire.alsa.enable = false;
+
+  # Security
+  security.polkit.enable = true;
+  security.sudo.wheelNeedsPassword = false;
+
+  # User
+  users.users.daniel = {
+    isNormalUser = true;
+    shell = pkgs.zsh;
+    extraGroups = [ "wheel" "networkmanager" "video" ];
   };
 
-  # Environment variables
-  environment.variables = {
-    XCURSOR_THEME = "Bibata-Modern-Classic";
-    XCURSOR_SIZE = "24";
-    PKG_CONFIG_PATH = "${pkgs.qt6.qtmultimedia}/lib/pkgconfig";
+  # Browser
+  programs.firefox.enable = true;
+
+  # Hyprland
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
+  # Display manager (greetd)
+  services.greetd = {
+    enable = true;
+
+    settings = {
+      default_session = {
+        command = "hyprland";
+        user = "daniel";
+      };
+    };
   };
 
   # System packages
   environment.systemPackages = with pkgs; [
-    kitty
+    kitty # Terminal
     waybar
     hyprpaper
     wget
@@ -154,25 +120,22 @@ services.pipewire = {
     mesa-demos
     unzip
     sudo
-    wpsoffice
     swappy
-    brightnessctl
+    slurp
     grim
-    remmina
-    hyprlock
-    tailscale
-    yazi
-    xfce.thunar
+    yazi # Text FileManager
+    xfce.thunar # GUI FileManager
     xfce.thunar-volman
     pulseaudio
     wl-clipboard
-    cabextract
     zsh
     zsh-autosuggestions
     zsh-syntax-highlighting
     deepcool-digital-linux
     ethtool
     fzf
+    cabextract
+    unzip
     networkmanager
     neovim
     ripgrep
@@ -190,37 +153,63 @@ services.pipewire = {
     (python3.withPackages (ps: with ps; [ pygobject3 ]))
     playerctl
     xfce.xfconf
-    moonlight-qt
-    sunshine
-    fira
-    font-awesome
-    roboto
-    liberation_ttf
-    noto-fonts
-    noto-fonts-color-emoji
-    nnn
-    qt6.qtbase
-    qt6.qtsvg
-    qt6.qtvirtualkeyboard
-    qt6.qtmultimedia
-    wireplumber
-    alsa-utils
-    hypridle
-    btop
-    networkmanagerapplet
+    arc-theme
+    papirus-icon-theme
+    adwaita-icon-theme
+    lxappearance
   ];
 
-  # OpenRazer
-  hardware.openrazer = {
-    enable = true;
-    users = [ "daniel" ];
+  # Flatpak
+  services.flatpak.enable = true;
+
+  # Cursor
+  environment.variables = {
+    XCURSOR_THEME = "Bibata-Modern-Classic";
+    XCURSOR_SIZE = "24";
   };
 
-  # Nix experimental features
+  # Openrazer
+  hardware.openrazer = {
+    enable = true;
+    users = [ "daniel" ]; # your username
+  };
+
+  # Fonts
+  fonts = {
+    fontconfig.enable = true;
+    packages = with pkgs; [
+      nerd-fonts.commit-mono
+      nerd-fonts.fira-code
+      nerd-fonts.symbols-only
+      fira-sans
+      roboto
+      font-awesome
+    ];
+  };
+
+  # Custom systemd service
+  systemd.services.deepcool-digital-linux = {
+    description = "Deepcool Digital Linux Service";
+
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+
+    serviceConfig = {
+      ExecStart = "/opt/deepcool/deepcool-digital-linux";
+      Restart = "on-failure";
+      RestartSec = 2;
+      User = "root";
+    };
+  };
+
+  # Nix settings
   nix.settings = {
     experimental-features = [
       "nix-command"
       "flakes"
     ];
   };
+
+  # System version
+  system.stateVersion = "25.11"; # Did you read the comment?
 }

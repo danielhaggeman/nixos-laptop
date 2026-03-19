@@ -1,5 +1,5 @@
 {
-  description = "My full NixOS system with Home-Manager, Zen Browser, Star Citizen support, and SilentSDDM";
+  description = "My NixOS system with Home-Manager and Zen Browser";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -13,54 +13,35 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nix-citizen.url = "github:LovingMelody/nix-citizen";
-
-    # Optional gaming support
-    nix-gaming.url = "github:fufexan/nix-gaming";
-    nix-citizen.inputs.nix-gaming.follows = "nix-gaming";
-
-    # SilentSDDM input
-    silentSDDM = {
-      url = "github:uiriansan/SilentSDDM";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, nix-citizen, silentSDDM, ... }:
-  let
-    system = "x86_64-linux";
-  in {
+  outputs = inputs @ { nixpkgs, home-manager, zen-browser, ... }: {
     nixosConfigurations.nix = nixpkgs.lib.nixosSystem {
-      inherit system;
-
-      specialArgs = { inherit inputs system; };
-
+      system = "x86_64-linux";
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
 
-        # Home Manager
+        # Home Manager module
         home-manager.nixosModules.home-manager
 
+        # Home Manager config for user daniel
         {
-          nixpkgs.config.allowUnfree = true;
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
           home-manager.users.daniel = { pkgs, ... }: {
             home.stateVersion = "24.11";
+            nixpkgs.config.allowUnfree = true;
 
+            # Import Zen Browser module
             imports = [
               zen-browser.homeModules.beta
             ];
 
             programs.zen-browser.enable = true;
-
+  
             home.packages = with pkgs; [
-              inputs.nix-citizen.packages.${system}.rsi-launcher
               fastfetch
               vscode
+              #spotify # use flatpak for spicetify
               discord
               rofi
               protonup-qt
@@ -70,25 +51,16 @@
               spicetify-cli
               pavucontrol
               polychromatic
+              openrazer-daemon
               fanctl
-              lm_sensors
+ 	      lm_sensors
+              spicetify-cli
             ];
           };
-        }
-
-        # nix-citizen module
-        nix-citizen.nixosModules.default
-
-        # SilentSDDM module
-        silentSDDM.nixosModules.default
-
-        # SilentSDDM options
-        {
-          programs.silentSDDM.enable = true;
-          programs.silentSDDM.theme = "default"; # choose from rei, ken, silvia, everforest, default
-          # Optional: add settings/backgrounds/profileIcons here
         }
       ];
     };
   };
 }
+
+ 
