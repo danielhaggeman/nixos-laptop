@@ -94,18 +94,11 @@
     enable = true;
     xwayland.enable = true;
   };
-
-  # Display manager (greetd)
-  services.greetd = {
-    enable = true;
-
-    settings = {
-      default_session = {
-        command = "hyprland";
-        user = "daniel";
-      };
-    };
-  };
+  services.xserver.displayManager.sessionCommands = ''
+  export XDG_SESSION_TYPE=wayland
+  export XDG_CURRENT_DESKTOP=Hyprland
+  export XDG_SESSION_DESKTOP=Hyprland
+'';
 
   # System packages
   environment.systemPackages = with pkgs; [
@@ -212,6 +205,8 @@ environment.variables = {
       "flakes"
     ];
   };
+
+  # Hyprland settings
 
   # System version
   system.stateVersion = "25.11"; # Update this when upgrading to a new NixOS release
