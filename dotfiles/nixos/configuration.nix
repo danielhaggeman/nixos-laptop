@@ -94,6 +94,17 @@
     enable = true;
     xwayland.enable = true;
   };
+
+ services.greetd = {
+  enable = false;
+  settings = {
+    default_session = {
+      command = "hyprland";
+      user = "daniel";
+    };
+  };
+};
+
   services.xserver.displayManager.sessionCommands = ''
   export XDG_SESSION_TYPE=wayland
   export XDG_CURRENT_DESKTOP=Hyprland
