@@ -109,25 +109,29 @@
 
   # System packages
   environment.systemPackages = with pkgs; [
-    kitty # Terminal
+    kitty
     waybar
     hyprpaper
     wget
-    lxqt.lxqt-policykit
-    git
-    htop
-    vulkan-tools
     mesa-demos
     unzip
     sudo
+    wpsoffice
     swappy
+    brightnessctl
     slurp
     grim
+    remmina
+    hyprlock
+    tailscale
+    yazi
+    xfce.thunar
     yazi # Text FileManager
     xfce.thunar # GUI FileManager
     xfce.thunar-volman
     pulseaudio
     wl-clipboard
+    cabextract
     zsh
     zsh-autosuggestions
     zsh-syntax-highlighting
@@ -139,20 +143,27 @@
     networkmanager
     neovim
     ripgrep
-    fd
-    nodejs
-    gvfs
-    pkg-config
-    libvterm
-    gcc
-    gnumake
-    cmake
-    bibata-cursors
-    gobject-introspection
-    gtk3
     (python3.withPackages (ps: with ps; [ pygobject3 ]))
     playerctl
     xfce.xfconf
+    moonlight-qt
+    sunshine
+    fira
+    font-awesome
+    roboto
+    liberation_ttf
+    noto-fonts
+    noto-fonts-color-emoji
+    nnn
+    qt6.qtbase
+    qt6.qtsvg
+    qt6.qtvirtualkeyboard
+    qt6.qtmultimedia
+    wireplumber
+    alsa-utils
+    hypridle
+    btop
+    networkmanagerapplet
     arc-theme
     papirus-icon-theme
     adwaita-icon-theme
@@ -203,5 +214,5 @@ environment.variables = {
   };
 
   # System version
-  system.stateVersion = "25.11"; # Did you read the comment?
+  system.stateVersion = "25.11"; # Update this when upgrading to a new NixOS release
 }
