@@ -19,6 +19,27 @@
   # Networking
   networking.hostName = "nix"; # Define your hostname.
   networking.networkmanager.enable = true;
+  networking.networkmanager.ensureProfiles.profiles = {
+  eno1 = {
+    connection = {
+      id = "eno1";
+      type = "ethernet";
+      interface-name = "eno1";
+    };
+    ipv4 = {
+      method = "manual";
+      addresses = "192.168.1.100/24";
+      gateway = "192.168.1.1";
+      dns = "192.168.1.1;";
+    };
+    ipv6 = {
+      method = "disabled";
+    };
+  };
+};
+  
+  
+  
   # networking.interfaces.eno1.ethtoolCommands = ''
   #   ethtool -s eno1 speed 1000 duplex full autoneg on
   # '';

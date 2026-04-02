@@ -14,7 +14,8 @@
     ], 
     "modules-right": [
         "pulseaudio",
-        "network",
+        "network#wifi",
+        "network#ethernet",
         "cpu",
         "memory",
         "battery",

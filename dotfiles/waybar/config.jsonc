@@ -9,7 +9,8 @@
   "modules-center": [
     "cpu",
     "memory",
-    "network"
+    "wifi",
+    "ethernet"
   ],
   "modules-right": [
     "pulseaudio",
