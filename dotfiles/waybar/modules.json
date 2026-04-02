@@ -37,7 +37,7 @@
     },
  
     "network#wifi": {
-        "interface": ["wlo1"],
+        "interface": "wlo1",
         "format-wifi": "   {essid} ({signalStrength}%)",
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": "{ifname} (No IP) ",
@@ -45,9 +45,10 @@
 	"on-click": "nm-connection-editor &"
     
     },
+    
     "network#ethernet": {
-        "interface": ["eno1"],
-        "format-ethernet": "{ipaddr}/{cidr} ",
+        "interface": "eno1",
+        "format-ethernet": "{ipaddr}/{cidr} ",
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": "{ifname} (No IP) ",
         "format-disconnected": "Disconnected ⚠",
