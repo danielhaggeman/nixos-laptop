@@ -8,13 +8,16 @@
   nixpkgs.config.allowUnfree = true;
 
   imports = [
-    # Include the results of the hardware scan.
     ./hardware-configuration.nix
   ];
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # Load nvidia kernel module early to prevent race condition on boot
+  boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+  boot.kernelParams = [ "nvidia-drm.modeset=1" ];
 
   # Networking
   networking.hostName = "nix";
@@ -36,26 +39,33 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    syntaxHighlighting.enable = false; # handled manually in .zshrc
-    autosuggestions.enable = false;    # handled manually in .zshrc
+    syntaxHighlighting.enable = false;
+    autosuggestions.enable = false;
   };
   users.defaultUserShell = pkgs.zsh;
 
-  # GPU (AMD)
-  services.xserver.videoDrivers = [ "amdgpu" ];
+  # GPU — Intel iGPU + Nvidia 4050 (PRIME offload)
+  services.xserver.videoDrivers = [ "nvidia" ];
+
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = true;
+    nvidiaSettings = true;
+    powerManagement.enable = true;
+
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
 
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-
-    extraPackages = with pkgs; [
-      mesa
-      vulkan-loader
-    ];
-
-    extraPackages32 = with pkgs; [
-      driversi686Linux.mesa
-    ];
   };
 
   # Gaming
@@ -92,7 +102,7 @@
     xwayland.enable = true;
   };
 
-  # Display Manager (SDDM) — FIX: explicitly enable SDDM with Wayland support
+  # Display Manager (SDDM)
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
@@ -124,6 +134,7 @@
     zsh
     zsh-autosuggestions
     zsh-syntax-highlighting
+    deepcool-digital-linux
     ethtool
     fzf
     networkmanager
@@ -160,12 +171,13 @@
   # Flatpak
   services.flatpak.enable = true;
 
-  # Environment variables — FIX: merged into a single block
+  # Environment variables
   environment.variables = {
     XCURSOR_THEME = "Bibata-Modern-Classic";
     XCURSOR_SIZE = "24";
     GTK_THEME = "Arc-Dark";
     GTK_ICON_THEME = "Papirus-Dark";
+    NIXOS_OZONE_WL = "1";
   };
 
   # Openrazer
