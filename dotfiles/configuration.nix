@@ -17,8 +17,11 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking
-  networking.hostName = "nix";
+  networking.hostName = "nix"; # Define your hostname.
   networking.networkmanager.enable = true;
+  # networking.interfaces.eno1.ethtoolCommands = ''
+  #   ethtool -s eno1 speed 1000 duplex full autoneg on
+  # '';
 
   # Timezone
   time.timeZone = "Europe/Amsterdam";
@@ -92,11 +95,21 @@
     xwayland.enable = true;
   };
 
-  # Display Manager (SDDM) — FIX: explicitly enable SDDM with Wayland support
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
+ services.greetd = {
+  enable = false;
+  settings = {
+    default_session = {
+      command = "hyprland";
+      user = "daniel";
+    };
   };
+};
+
+  services.xserver.displayManager.sessionCommands = ''
+  export XDG_SESSION_TYPE=wayland
+  export XDG_CURRENT_DESKTOP=Hyprland
+  export XDG_SESSION_DESKTOP=Hyprland
+'';
 
   # System packages
   environment.systemPackages = with pkgs; [
@@ -117,6 +130,8 @@
     tailscale
     yazi
     xfce.thunar
+    yazi # Text FileManager
+    xfce.thunar # GUI FileManager
     xfce.thunar-volman
     pulseaudio
     wl-clipboard
@@ -124,8 +139,11 @@
     zsh
     zsh-autosuggestions
     zsh-syntax-highlighting
+    deepcool-digital-linux
     ethtool
     fzf
+    cabextract
+    unzip
     networkmanager
     neovim
     ripgrep
@@ -160,18 +178,16 @@
   # Flatpak
   services.flatpak.enable = true;
 
-  # Environment variables — FIX: merged into a single block
+  # Cursor
   environment.variables = {
     XCURSOR_THEME = "Bibata-Modern-Classic";
     XCURSOR_SIZE = "24";
-    GTK_THEME = "Arc-Dark";
-    GTK_ICON_THEME = "Papirus-Dark";
   };
 
   # Openrazer
   hardware.openrazer = {
     enable = true;
-    users = [ "daniel" ];
+    users = [ "daniel" ]; # your username
   };
 
   # Fonts
@@ -187,6 +203,12 @@
     ];
   };
 
+environment.variables = {
+  GTK_THEME = "Arc-Dark";
+  GTK_ICON_THEME = "Papirus-Dark";
+};
+ 
+
   # Nix settings
   nix.settings = {
     experimental-features = [
@@ -195,6 +217,8 @@
     ];
   };
 
+  # Hyprland settings
+
   # System version
-  system.stateVersion = "25.11";
+  system.stateVersion = "25.11"; # Update this when upgrading to a new NixOS release
 }
