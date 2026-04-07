@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 { config, lib, pkgs, ... }:
 
 {
@@ -15,9 +11,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Load nvidia kernel module early to prevent race condition on boot
+  # Load nvidia modules early, suppress boot messages, blacklist nouveau
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
-  boot.kernelParams = [ "nvidia-drm.modeset=1" ];
+  boot.kernelParams = [ "nvidia-drm.modeset=1" "quiet" "loglevel=3" ];
+  boot.blacklistedKernelModules = [ "nouveau" ];
 
   # Networking
   networking.hostName = "nix";
@@ -67,6 +64,18 @@
     enable = true;
     enable32Bit = true;
   };
+
+  # Make SDDM wait for both GPU devices to be ready before starting
+  # This fixes the race condition causing the blinking _ on boot
+  systemd.services.display-manager.after = [
+    "systemd-udev-settle.service"
+    "dev-dri-card0.device"
+    "dev-dri-card1.device"
+  ];
+  systemd.services.display-manager.wants = [
+    "systemd-udev-settle.service"
+    "dev-dri-card0.device"
+  ];
 
   # Gaming
   programs.steam = {
