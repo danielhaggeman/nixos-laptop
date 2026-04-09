@@ -42,6 +42,7 @@
   users.defaultUserShell = pkgs.zsh;
 
   # GPU — Intel iGPU + Nvidia 4050 (PRIME offload)
+  services.xserver.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {

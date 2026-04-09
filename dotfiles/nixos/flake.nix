@@ -3,21 +3,17 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     nix-citizen.url = "github:LovingMelody/nix-citizen";
     nix-gaming.url = "github:fufexan/nix-gaming";
     nix-citizen.inputs.nix-gaming.follows = "nix-gaming";
-
     silentSDDM = {
       url = "github:uiriansan/SilentSDDM";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,28 +23,24 @@
   outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, nix-citizen, silentSDDM, ... }:
   let
     system = "x86_64-linux";
+    lib = nixpkgs.lib;
   in {
     nixosConfigurations.nix = nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs system; };
-
       modules = [
         ./configuration.nix
         ./hardware-configuration.nix
 
         # Home Manager module
         home-manager.nixosModules.home-manager
-
-        # Home Manager config for user daniel
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-
           home-manager.users.daniel = { pkgs, ... }: {
             home.stateVersion = "24.11";
-            
 
-            # Zen Browser module
+            # Zen Browser
             imports = [ zen-browser.homeModules.beta ];
             programs.zen-browser.enable = true;
 
@@ -77,12 +69,11 @@
 
         # SilentSDDM module
         silentSDDM.nixosModules.default
-
-        # SilentSDDM options
         {
           programs.silentSDDM.enable = true;
           programs.silentSDDM.theme = "default"; # rei, ken, silvia, everforest, default
           # Optional: add settings/backgrounds/profileIcons here
+          services.displayManager.sddm.wayland.enable = lib.mkForce true;
         }
       ];
     };
