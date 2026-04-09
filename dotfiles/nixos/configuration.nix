@@ -111,6 +111,9 @@
     xwayland.enable = true;
   };
 
+  # KDE Plasma 6
+  services.desktopManager.plasma6.enable = true;
+
   # Display Manager (SDDM)
   services.displayManager.sddm = {
     enable = true;
