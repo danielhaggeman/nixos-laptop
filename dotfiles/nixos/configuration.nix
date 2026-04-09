@@ -115,7 +115,7 @@
   };
 
   # KDE Plasma 6
-  services.desktopManager.plasma6.enable = true;
+  services.xserver.desktopManager.plasma6.enable = true;
 
   # Display Manager (SDDM) — no defaultSession forced so both show in menu
   services.displayManager.sddm = {
