@@ -68,14 +68,16 @@
 
   # Make SDDM wait for both GPU devices to be ready before starting
   # This fixes the race condition causing the blinking _ on boot
-  systemd.services.display-manager.after = [
+  systemd.services.display-manager.after = lib.mkForce [
     "systemd-udev-settle.service"
     "dev-dri-card0.device"
     "dev-dri-card1.device"
+    "multi-user.target"
   ];
-  systemd.services.display-manager.wants = [
+  systemd.services.display-manager.wants = lib.mkForce [
     "systemd-udev-settle.service"
     "dev-dri-card0.device"
+    "dev-dri-card1.device"
   ];
 
   # Gaming
